@@ -5,34 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Surgical Career</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="overflow-x-hidden">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    <div id="auth-view" class="fixed inset-0 bg-white text-gray-800 flex flex-col items-center justify-center z-[100] p-4 transition-opacity duration-500">
-        <div class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-multiply" style="background-image: url('https://images.unsplash.com/photo-1583912267659-1cb2a47381b1?q=80&w=2940&auto=format&fit=crop');"></div>
-        <div class="text-center z-10 w-full max-w-md px-4 bg-white/95 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
-            <img src="logo.jpg" onerror="this.src='logo.png'; this.onerror=null;" class="w-48 mx-auto mb-6 object-contain">
-            <h2 id="auth-title" class="text-2xl font-bold mb-2">Welcome Back</h2>
-            <p id="auth-subtitle" class="text-gray-600 mb-6 text-sm">Sign in to manage your portfolio and jobs.</p>
-            <div class="space-y-3">
-                <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border rounded">
-                <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border rounded">
-                <button id="btn-auth-action" class="w-full bg-[var(--surgeon-blue)] text-white font-bold py-3 rounded hover:opacity-90">Sign In</button>
-                
-                <p class="text-sm text-gray-500 mt-4"><span id="auth-toggle-text">New here?</span> <button id="btn-toggle-mode" class="text-blue-600 font-bold hover:underline">Create an account</button></p>
-                <button id="btn-skip" class="text-xs text-gray-400 underline mt-2">Continue as Guest (Demo)</button>
+    <style>
+        :root { --surgeon-blue: #002D72; --ascension-green: #009E73; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden">
+
+    <div id="auth-container" class="fixed inset-0 z-50 bg-[url('https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center flex items-center justify-center">
+        <div class="absolute inset-0 bg-blue-900/80 backdrop-blur-sm"></div>
+        <div class="relative bg-white p-8 rounded-xl shadow-2xl max-w-md w-full m-4">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-[#002D72] text-white rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="activity" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-[#002D72]">Your Surgical Career</h1>
+            </div>
+            <div class="space-y-4">
+                <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border rounded-lg">
+                <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border rounded-lg">
+                <button id="btn-auth-action" class="w-full bg-[#002D72] text-white font-bold py-3 rounded-lg hover:opacity-90">Sign In</button>
+                <div class="text-center border-t pt-4">
+                    <button id="btn-skip" class="text-sm text-gray-500 hover:text-[#002D72]">Continue as Guest</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <div id="app-container" class="hidden flex h-screen">
+        <aside class="w-64 bg-[#002D72] text-white hidden md:flex flex-col">
+            <div class="p-6 font-bold text-xl">YSC</div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a onclick="showTab('dashboard')" class="block p-3 rounded bg-blue-800 cursor-pointer">Dashboard</a>
+                <a onclick="showTab('jobs')" class="block p-3 rounded hover:bg-blue-800 cursor-pointer text-blue-100">Jobs</a>
+            </nav>
+            <div class="p-4 border-t border-blue-800">
+                <p id="user-name-display" class="text-sm font-medium">Guest</p>
+                <button id="logout-btn" class="text-xs text-blue-300">Log Out</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div id="dashboard" class="tab-content">
+                <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded shadow border">
+                        <p class="text-gray-500 text-sm">Portfolio Score</p>
+                        <p class="text-3xl font-bold text-[#002D72]">24/40</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="jobs" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Job Map</h2>
+                <div id="job-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>lucide.createIcons();</script>
     
-    <div id="app-wrapper" class="hidden">
-        <header class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 h-16 flex items-center px-4 md:px-6">
-            <div class="flex items-center h-full py-2"><img src="logo.jpg" onerror="this.src='logo.png'; this.onerror=null;" class="h-full w-auto object-contain"></div>
-            <div class="flex-grow"></div>
-            <div class="flex items-center space-x-4">
-                <div class="text-right hidden sm:block"><p id="user-name" class="text-sm font-bold">Guest</p><p class="text-xs text-gray-500">Trainee</p></div>
-                <img id="user
+    <script src="app.js"></script>
+
+</body>
+</html>
