@@ -13,64 +13,139 @@
 
     <style>
         :root { --surgeon-blue: #002D72; --ascension-green: #009E73; }
+        .tab-content { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden">
 
     <div id="auth-container" class="fixed inset-0 z-50 bg-[url('https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center flex items-center justify-center">
-        <div class="absolute inset-0 bg-blue-900/80 backdrop-blur-sm"></div>
-        <div class="relative bg-white p-8 rounded-xl shadow-2xl max-w-md w-full m-4">
+        <div class="absolute inset-0 bg-blue-900/90 backdrop-blur-sm"></div>
+        
+        <div class="relative bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full m-4 border border-gray-100">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-[#002D72] text-white rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-[var(--surgeon-blue)] text-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <i data-lucide="activity" class="w-8 h-8"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-[#002D72]">Your Surgical Career</h1>
+                <h1 class="text-3xl font-bold text-[var(--surgeon-blue)] tracking-tight">YSC</h1>
+                <p class="text-gray-500 text-sm mt-1">Redefining Surgical Training</p>
             </div>
+
             <div class="space-y-4">
-                <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border rounded-lg">
-                <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border rounded-lg">
-                <button id="btn-auth-action" class="w-full bg-[#002D72] text-white font-bold py-3 rounded-lg hover:opacity-90">Sign In</button>
-                <div class="text-center border-t pt-4">
-                    <button id="btn-skip" class="text-sm text-gray-500 hover:text-[#002D72]">Continue as Guest</button>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                    <input type="email" id="login-email" placeholder="doctor@nhs.net" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+                
+                <button id="btn-auth-action" class="w-full bg-[var(--surgeon-blue)] text-white font-bold py-3.5 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all mt-2">
+                    Sign In
+                </button>
+                
+                <div class="relative my-6 text-center">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                    <span class="relative bg-white px-2 text-xs text-gray-400 font-medium">OR SKIP LOGIN</span>
+                </div>
+
+                <button id="btn-skip" class="w-full py-2 text-sm text-gray-500 hover:text-[var(--surgeon-blue)] font-medium transition-colors">
+                    Continue as Guest (Demo Mode)
+                </button>
             </div>
+            <p class="text-center text-xs text-gray-300 mt-8">&copy; 2025 Your Surgical Career</p>
         </div>
     </div>
 
     <div id="app-container" class="hidden flex h-screen">
-        <aside class="w-64 bg-[#002D72] text-white hidden md:flex flex-col">
-            <div class="p-6 font-bold text-xl">YSC</div>
-            <nav class="flex-1 p-4 space-y-2">
-                <a onclick="showTab('dashboard')" class="block p-3 rounded bg-blue-800 cursor-pointer">Dashboard</a>
-                <a onclick="showTab('jobs')" class="block p-3 rounded hover:bg-blue-800 cursor-pointer text-blue-100">Jobs</a>
+        
+        <aside class="w-64 bg-[#002D72] text-white flex-shrink-0 flex flex-col hidden md:flex shadow-xl z-20">
+            <div class="p-6 border-b border-blue-800/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <span class="font-bold text-lg tracking-tight">YSC</span>
+                </div>
+            </div>
+            
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+                <p class="px-4 text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 mt-2">Navigation</p>
+                <a onclick="showTab('dashboard')" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-800 text-white cursor-pointer shadow-sm transition-all">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a onclick="showTab('jobs')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/10 cursor-pointer transition-all">
+                    <i data-lucide="briefcase" class="w-5 h-5"></i> Job Map
+                </a>
+                <a onclick="showTab('portfolio')" class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/10 cursor-pointer transition-all">
+                    <i data-lucide="folder-open" class="w-5 h-5"></i> Portfolio
+                </a>
             </nav>
-            <div class="p-4 border-t border-blue-800">
-                <p id="user-name-display" class="text-sm font-medium">Guest</p>
-                <button id="logout-btn" class="text-xs text-blue-300">Log Out</button>
+
+            <div class="p-4 border-t border-blue-800/50 bg-blue-900/30">
+                <div class="flex items-center gap-3 px-2">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-xs font-bold shadow-md">DR</div>
+                    <div class="overflow-hidden">
+                        <p id="user-name-display" class="text-sm font-medium truncate text-white">Guest</p>
+                        <button id="logout-btn" class="text-xs text-blue-300 hover:text-white transition-colors text-left flex items-center gap-1">
+                            <i data-lucide="log-out" class="w-3 h-3"></i> Log Out
+                        </button>
+                    </div>
+                </div>
             </div>
         </aside>
 
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div id="dashboard" class="tab-content">
-                <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded shadow border">
-                        <p class="text-gray-500 text-sm">Portfolio Score</p>
-                        <p class="text-3xl font-bold text-[#002D72]">24/40</p>
+        <main class="flex-1 overflow-y-auto bg-slate-50 relative w-full">
+            
+            <header class="bg-white border-b sticky top-0 z-10 md:hidden p-4 flex justify-between items-center shadow-sm">
+                <span class="font-bold text-[var(--surgeon-blue)] flex items-center gap-2">
+                    <i data-lucide="activity" class="w-5 h-5"></i> YSC
+                </span>
+                <button class="p-2 text-gray-600"><i data-lucide="menu" class="w-6 h-6"></i></button>
+            </header>
+
+            <div id="dashboard" class="tab-content p-6 md:p-10 max-w-7xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+                <p class="text-gray-500 mb-8">Here is your training overview for today.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i data-lucide="award" class="w-24 h-24 text-blue-600"></i></div>
+                        <p class="text-gray-500 text-sm font-medium mb-1 uppercase tracking-wide">Portfolio Score</p>
+                        <div class="flex items-end gap-2 mt-2">
+                            <span class="text-5xl font-extrabold text-[var(--surgeon-blue)]">24</span>
+                            <span class="text-gray-400 text-lg font-medium mb-1">/ 40</span>
+                        </div>
+                        <div class="w-full bg-gray-100 h-2 rounded-full mt-4 overflow-hidden">
+                            <div class="bg-[var(--surgeon-blue)] h-full rounded-full" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                         <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i data-lucide="calendar" class="w-24 h-24 text-red-600"></i></div>
+                        <p class="text-gray-500 text-sm font-medium mb-1 uppercase tracking-wide">Next Deadline</p>
+                        <div class="flex items-end gap-2 mt-2">
+                            <span class="text-5xl font-extrabold text-red-600">14</span>
+                            <span class="text-gray-400 text-lg font-medium mb-1">days</span>
+                        </div>
+                        <p class="text-xs font-semibold text-red-400 mt-4 bg-red-50 inline-block px-2 py-1 rounded">ST3 Application Window</p>
+                    </div>
+
+                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center items-center text-center">
+                        <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 text-blue-600">
+                            <i data-lucide="plus" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800">Log Activity</h3>
+                        <p class="text-xs text-gray-500 mt-1 mb-3">Add audits, papers, or cases</p>
+                        <button class="text-sm bg-white border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition-colors">New Entry</button>
                     </div>
                 </div>
             </div>
 
-            <div id="jobs" class="tab-content hidden">
-                <h2 class="text-2xl font-bold mb-6">Job Map</h2>
-                <div id="job-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
-        </main>
-    </div>
-
-    <script>lucide.createIcons();</script>
-    
-    <script src="app.js"></script>
-
-</body>
-</html>
+            <div id="jobs" class="tab-content hidden p-6 md:p-10 max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Job Opportunities</h2>
+                        <p class="text-gray-500 text-sm mt-1">Live vacancies sourced for your grade.</p>
+                    </div>
+                    <div class="flex gap-2">
+                         <button class="bg-white border px-4 py-2 rounded-lg text-sm font
