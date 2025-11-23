@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // YOUR KEY CONFIGURATION
@@ -17,6 +17,7 @@ const firebaseConfig = {
 let auth, db, storage, user;
 let isDemo = true;
 let isSignUp = false;
+let savedJobIds = new Set(); // Track saved jobs locally
 
 // INITIALIZE FIREBASE
 try {
@@ -32,8 +33,16 @@ try {
 
 // AUTH LOGIC
 if(!isDemo) {
-    onAuthStateChanged(auth, (u) => {
-        if(u) { user = u; showApp(); loadData(); }
+    onAuthStateChanged(auth, async (u) => {
+        if(u) { 
+            user = u; 
+            showApp(); 
+            loadData();
+            // Load saved jobs on login
+            const savedSnap = await getDocs(collection(db, "users", user.uid, "savedJobs"));
+            savedJobIds = new Set(savedSnap.docs.map(doc => doc.id));
+            renderJobs(); // Re-render to show red hearts
+        }
         else { document.getElementById('auth-view').classList.remove('hidden'); document.getElementById('app-wrapper').classList.add('hidden'); }
     });
 }
@@ -67,8 +76,6 @@ document.getElementById('btn-auth-action').addEventListener('click', async () =>
         else await signInWithEmailAndPassword(auth, e, p);
     } catch(err) { alert(err.message); }
 });
-
-// (Google button listener removed as requested)
 
 document.getElementById('btn-skip').addEventListener('click', () => {
     isDemo = true; user = {uid:'demo'}; showApp(); renderActs([{description:'Demo Paper', points:5}]);
@@ -133,7 +140,7 @@ function renderActs(list) {
 }
 
 // =========================================
-// UPDATED DATASETS (Now with IDs)
+// DATASETS
 // =========================================
 const jobListings = [
     { id: "j1", title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025", salary: "£55,329" },
@@ -168,7 +175,7 @@ const webinars = [
 const specs = ["General Surgery", "Cardiothoracic", "Neurosurgery", "ENT", "Paediatric", "T&O", "Urology", "Vascular", "Plastics", "OMFS"];
 
 // =========================================
-// RENDER LOGIC (Updated with Heart Button)
+// RENDER LOGIC (Updated for visual hearts)
 // =========================================
 function renderJobs(filters = {}) {
     const container = document.getElementById('job-list-container');
@@ -180,13 +187,15 @@ function renderJobs(filters = {}) {
                (!filters.region || job.location.includes(filters.region));
     });
     filtered.forEach(job => {
+        const isSaved = savedJobIds.has(job.id);
+        const heartClass = isSaved ? "text-red-500 fill-current" : "text-gray-400";
+        
         const card = document.createElement('div');
         card.className = 'bg-white border rounded-lg p-5 hover:shadow-md transition-shadow';
-        // NEW HTML WITH HEART BUTTON
         card.innerHTML = `
             <div class="flex justify-between items-start mb-3">
                 <div><h3 class="font-bold text-lg text-blue-700">${job.title}</h3><p class="text-sm text-gray-600">${job.location}</p></div>
-                <button onclick="saveJob('${job.id}')" class="text-gray-400 hover:text-red-500 hover:fill-current transition-colors"><i data-lucide="heart" class="w-6 h-6"></i></button>
+                <button onclick="toggleLike(this, '${job.id}')" class="${heartClass} hover:text-red-500 transition-colors"><i data-lucide="heart" class="w-6 h-6"></i></button>
             </div>
             <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">${job.grade}</span>
             <div class="grid grid-cols-3 gap-2 mb-4 text-sm">
@@ -197,6 +206,7 @@ function renderJobs(filters = {}) {
             <div class="flex gap-2"><button class="flex-1 bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button></div>`;
         container.appendChild(card);
     });
+    if(window.lucide) window.lucide.createIcons();
 }
 
 function renderHospitals(searchTerm = "") {
@@ -250,7 +260,6 @@ if(wBody) webinars.forEach(w => wBody.innerHTML += `<tr><td class="p-2">${w.name
 const specGrid = document.getElementById('spec-grid-container');
 if(specGrid) specs.forEach(s => specGrid.innerHTML += `<div class="border p-4 rounded hover:shadow cursor-pointer"><h3 class="font-bold">${s}</h3></div>`);
 
-// Attach to Window for HTML onclick
 window.switchJobTab = (t) => {
     document.getElementById('job-training').classList.toggle('hidden', t !== 'training');
     document.getElementById('job-hospital').classList.toggle('hidden', t !== 'hospital');
@@ -301,21 +310,36 @@ if(rCtx) {
 }
 
 // =========================================
-// NEW SAVE JOB LOGIC
+// NEW: TOGGLE SAVE & VISUALS
 // =========================================
-window.saveJob = async (jobId) => {
+window.toggleLike = async (btn, jobId) => {
     if(isDemo) { alert("Please login to save jobs."); return; }
     
-    // 1. Find the job details
-    const jobToSave = jobListings.find(j => j.id === jobId);
+    const isCurrentlySaved = savedJobIds.has(jobId);
     
-    // 2. Save to Firebase under users -> [userID] -> savedJobs -> [jobID]
+    // 1. Immediate Visual Feedback
+    btn.classList.toggle('text-red-500');
+    btn.classList.toggle('text-gray-400');
+    btn.classList.toggle('fill-current');
+
+    // 2. Database Interaction
     try {
-        // We use setDoc so if they click it twice, it just overwrites instead of creating duplicates
-        await setDoc(doc(db, "users", user.uid, "savedJobs", jobId), jobToSave);
-        alert("Job saved to your shortlist!");
+        if (isCurrentlySaved) {
+            // Unsave
+            await deleteDoc(doc(db, "users", user.uid, "savedJobs", jobId));
+            savedJobIds.delete(jobId);
+        } else {
+            // Save
+            const jobToSave = jobListings.find(j => j.id === jobId);
+            await setDoc(doc(db, "users", user.uid, "savedJobs", jobId), jobToSave);
+            savedJobIds.add(jobId);
+        }
     } catch(err) {
-        console.error(err);
-        alert("Error saving job: " + err.message);
+        console.error("Error toggling save:", err);
+        // Revert visuals on error
+        btn.classList.toggle('text-red-500');
+        btn.classList.toggle('text-gray-400');
+        btn.classList.toggle('fill-current');
+        alert("Something went wrong. Please try again.");
     }
 };
