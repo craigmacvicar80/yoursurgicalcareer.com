@@ -129,16 +129,16 @@ function renderActs(list) {
     if(document.getElementById('gauge-text')) document.getElementById('gauge-text').textContent = Math.round(pts/40*100)+"%";
     if(window.gaugeChart) { window.gaugeChart.data.datasets[0].data = [pts, Math.max(0, 40-pts)]; window.gaugeChart.update(); }
 }
+// DATASETS
+        const jobListings = [
+            { id: "j1", title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: "j2", title: "ST3 General Surgery", location: "West Midlands", grade: "ST3", specialty: "General Surgery", comp: "6.5", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: "j3", title: "ST3 T&O", location: "Scotland", grade: "ST3", specialty: "T&O", comp: "12.5", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: "j4", title: "CT1 Core Training", location: "Yorkshire", grade: "CT1", specialty: "General Surgery", comp: "4.1", deadline: "05 Dec 2025", salary: "£43,923" },
+            { id: "j5", title: "ST3 Urology", location: "West Midlands", grade: "ST3", specialty: "Urology", comp: "6.8", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: "j6", title: "Clinical Fellow (Plastics)", location: "London (North Central)", grade: "Fellow", specialty: "Plastics", comp: "N/A", deadline: "15 Jan 2026", salary: "£55,329" },
+        ];
 
-// DATASETS (This is where we will eventually connect to Firebase for Courses/Jobs)
-const jobListings = [
-    { title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025", salary: "£55,329" },
-    { title: "ST3 General Surgery", location: "West Midlands", grade: "ST3", specialty: "General Surgery", comp: "6.5", deadline: "29 Nov 2025", salary: "£55,329" },
-    { title: "ST3 T&O", location: "Scotland", grade: "ST3", specialty: "T&O", comp: "12.5", deadline: "29 Nov 2025", salary: "£55,329" },
-    { title: "CT1 Core Training", location: "Yorkshire", grade: "CT1", specialty: "General Surgery", comp: "4.1", deadline: "05 Dec 2025", salary: "£43,923" },
-    { title: "ST3 Urology", location: "West Midlands", grade: "ST3", specialty: "Urology", comp: "6.8", deadline: "29 Nov 2025", salary: "£55,329" },
-    { title: "Clinical Fellow (Plastics)", location: "London (North Central)", grade: "Fellow", specialty: "Plastics", comp: "N/A", deadline: "15 Jan 2026", salary: "£55,329" },
-];
 
 const hospitalData = [
     { name: "Aberdeen Royal Infirmary", region: "Scotland", city: "Aberdeen", website: "https://www.nhsgrampian.org/", wikiLink: "https://en.wikipedia.org/wiki/Aberdeen_Royal_Infirmary", stats: ["Major Trauma", "Teaching"], reviews: { rent: "£600", transport: "Car Essential", lifestyle: "Outdoors, Surfing", verdict: "Great community." }, specialties: ["Trauma", "General"] },
@@ -176,7 +176,18 @@ function renderJobs(filters = {}) {
     filtered.forEach(job => {
         const card = document.createElement('div');
         card.className = 'bg-white border rounded-lg p-5 hover:shadow-md transition-shadow';
-        card.innerHTML = `<div class="flex justify-between items-start mb-3"><div><h3 class="font-bold text-lg text-blue-700">${job.title}</h3><p class="text-sm text-gray-600">${job.location}</p></div><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">${job.grade}</span></div><div class="grid grid-cols-3 gap-2 mb-4 text-sm"><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Comp</span><span class="font-semibold">${job.comp}</span></div><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Deadline</span><span class="font-semibold text-red-600">${job.deadline}</span></div><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Salary</span><span class="font-semibold">${job.salary}</span></div></div><div class="flex gap-2"><button class="flex-1 bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button></div>`;
+        card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div><h3 class="font-bold text-lg text-blue-700">${job.title}</h3><p class="text-sm text-gray-600">${job.location}</p></div>
+                        <button onclick="saveJob('${job.id}')" class="text-gray-400 hover:text-red-500 hover:fill-current transition-colors"><i data-lucide="heart" class="w-6 h-6"></i></button>
+                    </div>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">${job.grade}</span>
+                    <div class="grid grid-cols-3 gap-2 mb-4 text-sm">
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Comp</span><span class="font-semibold">${job.comp}</span></div>
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Deadline</span><span class="font-semibold text-red-600">${job.deadline}</span></div>
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Salary</span><span class="font-semibold">${job.salary}</span></div>
+                    </div>
+                    <div class="flex gap-2"><button class="flex-1 bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button></div>`;
         container.appendChild(card);
     });
 }
@@ -281,3 +292,20 @@ if(rCtx) {
         options: { plugins: { legend: { display: false } }, scales: { r: { ticks: { display: false } } } }
     });
 }
+// SAVE JOB LOGIC
+        window.saveJob = async (jobId) => {
+            if(isDemo) { alert("Please login to save jobs."); return; }
+            
+            // 1. Find the job details
+            const jobToSave = jobListings.find(j => j.id === jobId);
+            
+            // 2. Save to Firebase under users -> [userID] -> savedJobs -> [jobID]
+            try {
+                // We use setDoc so if they click it twice, it just overwrites instead of creating duplicates
+                await setDoc(doc(db, "users", user.uid, "savedJobs", jobId), jobToSave);
+                alert("Job saved to your shortlist!");
+            } catch(err) {
+                console.error(err);
+                alert("Error saving job: " + err.message);
+            }
+        };
