@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -100,15 +100,17 @@
                         </div>
                     </div>
 
-                    <!-- Jobs (FULL FEATURES) -->
+                    <!-- Jobs (SAVED JOBS + DUAL LINKS) -->
                     <div id="jobs-view" class="content-view hidden space-y-6">
                         <div class="bg-white p-6 rounded shadow">
                             <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Jobs & Intel</h2><span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Live Updates</span></div>
                             <div class="flex border-b mb-6 space-x-6 overflow-x-auto">
                                 <button class="tab-btn active whitespace-nowrap" onclick="switchJobTab('training')">Training Posts</button>
+                                <button class="tab-btn whitespace-nowrap text-red-600" onclick="switchJobTab('saved')"><i data-lucide="heart" class="w-4 h-4 inline mr-1"></i>Saved Jobs</button>
                                 <button class="tab-btn whitespace-nowrap" onclick="switchJobTab('hospital')">Hospital Explorer</button>
                                 <button class="tab-btn whitespace-nowrap text-orange-600" onclick="switchJobTab('reviews')"><i data-lucide="star" class="w-4 h-4 inline mr-1"></i>Location Reviews</button>
                             </div>
+                            
                             <!-- Training Tab -->
                             <div id="job-training" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                                 <div class="lg:col-span-1 space-y-4">
@@ -120,6 +122,13 @@
                                 </div>
                                 <div class="lg:col-span-3 space-y-4" id="job-list-container"></div>
                             </div>
+
+                            <!-- Saved Jobs Tab -->
+                            <div id="job-saved" class="hidden">
+                                <div class="bg-red-50 border border-red-200 rounded p-4 mb-4 text-sm text-red-800 flex gap-2"><i data-lucide="heart" class="w-4 h-4"></i> Your shortlisted opportunities.</div>
+                                <div id="saved-job-list-container" class="space-y-4"></div>
+                            </div>
+
                             <!-- Hospital Tab -->
                             <div id="job-hospital" class="hidden">
                                 <div class="flex gap-2 mb-4"><input type="text" id="hosp-search" placeholder="Search (e.g. 'Aberdeen', 'Trauma')..." class="flex-grow border p-2 rounded"></div>
@@ -134,7 +143,7 @@
                         </div>
                     </div>
 
-                    <!-- Portfolio (FULL DETAIL) -->
+                    <!-- Portfolio -->
                     <div id="portfolio-view" class="content-view hidden space-y-6">
                         <div class="bg-white p-4 rounded shadow flex justify-between"><h2 class="text-xl font-bold">Portfolio</h2><button onclick="document.getElementById('modal-activity').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-1 rounded">Log Activity</button></div>
                         <div class="bg-white p-6 rounded shadow"><div id="activity-list" class="space-y-2"></div></div>
@@ -152,25 +161,15 @@
                     </div>
 
                     <!-- Events, Specialties, Courses, Webinars, Pathway, Personal Dev, Profile, Contact, Memberships -->
-                    <!-- (Simplified block structure to save space but ALL CONTENT is preserved in JS arrays below) -->
                     <div id="events-view" class="content-view hidden space-y-6"><div class="bg-white p-6 rounded shadow"><div class="flex justify-between mb-4"><h2 class="text-xl font-bold">Events</h2><button class="text-blue-600 text-sm">Add</button></div><div class="flex border-b mb-4"><button class="tab-btn active mr-4" onclick="switchEventView('list')">List</button><button class="tab-btn" onclick="switchEventView('cal')">Calendar</button></div><div id="evt-list-view" class="space-y-2"></div><div id="evt-cal-view" class="hidden"><div id="calendar-grid" class="grid grid-cols-7 gap-1 mt-2"></div></div></div></div>
-                    
                     <div id="specialties-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><div id="spec-grid"><h2 class="text-xl font-bold mb-4">Specialties</h2><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="spec-grid-container"></div></div><div id="spec-detail" class="hidden"><button onclick="document.getElementById('spec-detail').classList.add('hidden');document.getElementById('spec-grid').classList.remove('hidden')" class="mb-4 text-sm text-blue-600">← Back</button><h2 id="spec-title" class="text-2xl font-bold mb-4"></h2><div class="space-y-4"><div class="border p-4 rounded"><h3>Society</h3><p class="text-sm text-gray-500">Key national society details.</p></div></div></div></div></div>
-                    
                     <div id="courses-view" class="content-view hidden space-y-6"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-4">Courses</h2><input placeholder="Search..." class="border p-2 w-full rounded mb-4"><table class="w-full text-left text-sm"><thead><tr class="border-b"><th>Course</th><th>Provider</th></tr></thead><tbody id="course-table-body"></tbody></table></div></div>
-                    
                     <div id="webinars-view" class="content-view hidden space-y-6"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-4">Webinars</h2><table class="w-full text-left"><thead><tr class="border-b"><th>Topic</th><th>Date</th></tr></thead><tbody id="webinar-table-body"></tbody></table></div></div>
-                    
                     <div id="pathway-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-6">Pathway</h2><div class="space-y-8 border-l-2 border-blue-500 pl-6 ml-2"><div class="relative"><div class="absolute -left-[31px] top-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white"></div><h3 class="font-bold">Medical School</h3><p class="text-sm text-gray-600">Build portfolio.</p></div><div class="relative"><div class="absolute -left-[31px] top-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white"></div><h3 class="font-bold">Foundation</h3><p class="text-sm text-gray-600">MRCS Part A.</p></div><div class="relative"><div class="absolute -left-[31px] top-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div><h3 class="font-bold">Core Training</h3><p class="text-sm text-gray-600">MRCS Part B, ST3.</p></div></div></div></div>
-                    
                     <div id="personal-development-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-4">Personal Development</h2><div class="grid md:grid-cols-2 gap-4"><div class="border p-4 rounded bg-slate-50"><h3>Leadership</h3><p class="text-sm">Societies, Rep roles.</p></div><div class="border p-4 rounded bg-slate-50"><h3>Wellbeing</h3><p class="text-sm">Mentorship, Hobbies.</p></div></div></div></div>
-                    
                     <div id="profile-view" class="content-view hidden space-y-6"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-4">Edit Profile</h2><form id="profile-form" class="space-y-3"><input id="prof-name" placeholder="Full Name" class="w-full border p-2 rounded"><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Save</button></form></div></div>
-                    
                     <div id="contact-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><h2>Contact</h2><p>info@yoursurgicalcareer.com</p></div></div>
-                    
                     <div id="memberships-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><h2>Memberships</h2><ul class="list-disc pl-5"><li>RCSEng</li><li>ASiT</li><li>BMA</li></ul></div></div>
-                    
                     <div id="shop-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow text-center"><h2>Shop Coming Soon</h2></div></div>
 
                 </div>
@@ -222,6 +221,7 @@
         let auth, db, storage, user;
         let isDemo = true;
         let isSignUp = false;
+        let savedJobIds = new Set(JSON.parse(localStorage.getItem('savedJobs') || '[]'));
 
         try {
             if(firebaseConfig.apiKey) {
@@ -335,12 +335,12 @@
 
         // DATASETS
         const jobListings = [
-            { title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025", salary: "£55,329" },
-            { title: "ST3 General Surgery", location: "West Midlands", grade: "ST3", specialty: "General Surgery", comp: "6.5", deadline: "29 Nov 2025", salary: "£55,329" },
-            { title: "ST3 T&O", location: "Scotland", grade: "ST3", specialty: "T&O", comp: "12.5", deadline: "29 Nov 2025", salary: "£55,329" },
-            { title: "CT1 Core Training", location: "Yorkshire", grade: "CT1", specialty: "General Surgery", comp: "4.1", deadline: "05 Dec 2025", salary: "£43,923" },
-            { title: "ST3 Urology", location: "West Midlands", grade: "ST3", specialty: "Urology", comp: "6.8", deadline: "29 Nov 2025", salary: "£55,329" },
-            { title: "Clinical Fellow (Plastics)", location: "London (North Central)", grade: "Fellow", specialty: "Plastics", comp: "N/A", deadline: "15 Jan 2026", salary: "£55,329" },
+            { id: 1, title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: 2, title: "ST3 General Surgery", location: "West Midlands", grade: "ST3", specialty: "General Surgery", comp: "6.5", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: 3, title: "ST3 T&O", location: "Scotland", grade: "ST3", specialty: "T&O", comp: "12.5", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: 4, title: "CT1 Core Training", location: "Yorkshire", grade: "CT1", specialty: "General Surgery", comp: "4.1", deadline: "05 Dec 2025", salary: "£43,923" },
+            { id: 5, title: "ST3 Urology", location: "West Midlands", grade: "ST3", specialty: "Urology", comp: "6.8", deadline: "29 Nov 2025", salary: "£55,329" },
+            { id: 6, title: "Clinical Fellow (Plastics)", location: "London (North Central)", grade: "Fellow", specialty: "Plastics", comp: "N/A", deadline: "15 Jan 2026", salary: "£55,329" },
         ];
 
         const hospitalData = [
@@ -355,7 +355,21 @@
             { name: "Southmead Hospital", region: "South West", city: "Bristol", website: "https://www.nbt.nhs.uk/", wikiLink: "https://en.wikipedia.org/wiki/Southmead_Hospital", stats: ["L1 Trauma"], reviews: { rent: "£1200", transport: "Bus", lifestyle: "Arty", verdict: "Beautiful site." }, specialties: ["Neuro", "Vascular"] }
         ];
 
-        // INITIAL RENDERERS (Fixed with Null Checks)
+        // SAVE JOB LOGIC
+        window.toggleSaveJob = (id) => {
+            if (savedJobIds.has(id)) savedJobIds.delete(id);
+            else savedJobIds.add(id);
+            localStorage.setItem('savedJobs', JSON.stringify([...savedJobIds]));
+            
+            const currentFilters = {
+                grade: document.getElementById('filter-grade')?.value,
+                spec: document.getElementById('filter-spec')?.value,
+                region: document.getElementById('filter-region')?.value
+            };
+            renderJobs(currentFilters);
+            renderSavedJobs();
+        };
+
         function renderJobs(filters = {}) {
             const container = document.getElementById('job-list-container');
             if(!container) return;
@@ -366,11 +380,64 @@
                        (!filters.region || job.location.includes(filters.region));
             });
             filtered.forEach(job => {
+                const isSaved = savedJobIds.has(job.id);
                 const card = document.createElement('div');
                 card.className = 'bg-white border rounded-lg p-5 hover:shadow-md transition-shadow';
-                card.innerHTML = `<div class="flex justify-between items-start mb-3"><div><h3 class="font-bold text-lg text-blue-700">${job.title}</h3><p class="text-sm text-gray-600">${job.location}</p></div><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">${job.grade}</span></div><div class="grid grid-cols-3 gap-2 mb-4 text-sm"><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Comp</span><span class="font-semibold">${job.comp}</span></div><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Deadline</span><span class="font-semibold text-red-600">${job.deadline}</span></div><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Salary</span><span class="font-semibold">${job.salary}</span></div></div><div class="flex gap-2"><button class="flex-1 bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button></div>`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg text-blue-700">${job.title}</h3>
+                            <p class="text-sm text-gray-600">${job.location}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">${job.grade}</span>
+                            <button onclick="toggleSaveJob(${job.id})" class="p-1 rounded hover:bg-gray-100">
+                                <i data-lucide="heart" class="w-5 h-5 ${isSaved ? 'fill-red-600 text-red-600' : 'text-gray-400'}"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mb-4 text-sm">
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Comp</span><span class="font-semibold">${job.comp}</span></div>
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Deadline</span><span class="font-semibold text-red-600">${job.deadline}</span></div>
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Salary</span><span class="font-semibold">${job.salary}</span></div>
+                    </div>
+                    <div class="flex gap-2"><button class="flex-1 bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button></div>
+                `;
                 container.appendChild(card);
             });
+            lucide.createIcons();
+        }
+
+        function renderSavedJobs() {
+            const container = document.getElementById('saved-job-list-container');
+            if(!container) return;
+            container.innerHTML = '';
+            const saved = jobListings.filter(job => savedJobIds.has(job.id));
+            if (saved.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 italic">No jobs saved yet.</p>';
+                return;
+            }
+            saved.forEach(job => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border rounded-lg p-5 hover:shadow-md transition-shadow';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg text-blue-700">${job.title}</h3>
+                            <p class="text-sm text-gray-600">${job.location}</p>
+                        </div>
+                        <button onclick="toggleSaveJob(${job.id})" class="p-1 rounded hover:bg-gray-100">
+                            <i data-lucide="heart" class="w-5 h-5 fill-red-600 text-red-600"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mb-2 text-sm">
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Comp</span><span class="font-semibold">${job.comp}</span></div>
+                        <div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Deadline</span><span class="font-semibold text-red-600">${job.deadline}</span></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
         }
 
         function renderHospitals(searchTerm = "") {
@@ -440,6 +507,7 @@
             document.getElementById('job-training').classList.toggle('hidden', t !== 'training');
             document.getElementById('job-hospital').classList.toggle('hidden', t !== 'hospital');
             document.getElementById('job-reviews').classList.toggle('hidden', t !== 'reviews');
+            document.getElementById('job-saved').classList.toggle('hidden', t !== 'saved');
         };
         window.switchEventView = (t) => {
             document.getElementById('evt-list-view').classList.toggle('hidden', t !== 'list');
@@ -460,6 +528,7 @@
 
         // Run
         renderJobs();
+        renderSavedJobs();
         renderHospitals();
         renderReviews();
         
