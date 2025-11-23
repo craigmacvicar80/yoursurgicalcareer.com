@@ -23,6 +23,7 @@
         .nav-link.active svg { color: white; }
         .tab-btn.active { color: var(--surgeon-blue); border-bottom: 2px solid var(--surgeon-blue); font-weight: 600; }
         .tab-btn { padding-bottom: 8px; border-bottom: 2px solid transparent; }
+        .review-score { background: #00aa6c; color: white; font-weight: bold; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="overflow-x-hidden">
@@ -61,6 +62,8 @@
                             <a href="#" data-target="dashboard-view" class="nav-link active flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
                             <a href="#" data-target="jobs-view" class="nav-link flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100"><i data-lucide="map"></i> <span>Jobs</span></a>
                             <a href="#" data-target="portfolio-view" class="nav-link flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100"><i data-lucide="book-marked"></i> <span>Portfolio</span></a>
+                            <a href="#" data-target="courses-view" class="nav-link flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100"><i data-lucide="award"></i> <span>Courses</span></a>
+                            <a href="#" data-target="pathway-view" class="nav-link flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100"><i data-lucide="milestone"></i> <span>Pathway</span></a>
                         </nav>
                     </div>
                 </aside>
@@ -84,12 +87,12 @@
 
                     <div id="jobs-view" class="content-view hidden space-y-6">
                         <div class="bg-white p-6 rounded shadow">
-                            <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Jobs & Intel</h2></div>
+                            <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Jobs & Intel</h2><span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Live Updates</span></div>
                             <div class="flex border-b mb-6 space-x-6 overflow-x-auto">
                                 <button class="tab-btn active whitespace-nowrap" onclick="switchJobTab('training')">Training Posts</button>
                                 <button class="tab-btn whitespace-nowrap" onclick="switchJobTab('hospital')">Hospital Explorer</button>
+                                <button class="tab-btn whitespace-nowrap text-orange-600" onclick="switchJobTab('reviews')"><i data-lucide="star" class="w-4 h-4 inline mr-1"></i>Location Reviews</button>
                             </div>
-                            
                             <div id="job-training" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                                 <div class="lg:col-span-1 space-y-4">
                                     <div class="bg-gray-50 p-4 rounded border">
@@ -99,18 +102,25 @@
                                 </div>
                                 <div class="lg:col-span-3 space-y-4" id="job-list-container"></div>
                             </div>
-                            
                             <div id="job-hospital" class="hidden">
                                 <div class="flex gap-2 mb-4"><input type="text" id="hosp-search" placeholder="Search (e.g. 'Aberdeen')..." class="flex-grow border p-2 rounded"></div>
                                 <div id="hosp-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[700px] overflow-y-auto pr-2"></div>
+                            </div>
+                            <div id="job-reviews" class="hidden">
+                                <div class="bg-orange-50 border border-orange-200 rounded p-4 mb-4 text-sm text-orange-800 flex gap-2"><i data-lucide="info" class="w-4 h-4"></i> Guides on rent, lifestyle & culture.</div>
+                                <div id="review-list" class="grid grid-cols-1 gap-6"></div>
                             </div>
                         </div>
                     </div>
 
                     <div id="portfolio-view" class="content-view hidden space-y-6">
                         <div class="bg-white p-4 rounded shadow flex justify-between"><h2 class="text-xl font-bold">Portfolio</h2><button onclick="document.getElementById('modal-activity').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-1 rounded">Log Activity</button></div>
-                        <div class="bg-white p-6 rounded shadow"><div id="activity-list" class="space-y-2"><p class="text-gray-400">No activities logged yet.</p></div></div>
+                        <div class="bg-white p-6 rounded shadow"><div id="activity-list" class="space-y-2"><p class="text-gray-400">Loading...</p></div></div>
                     </div>
+                    
+                    <div id="courses-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-4">Courses</h2><p>Course list loading...</p></div></div>
+                    
+                    <div id="pathway-view" class="content-view hidden"><div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold mb-4">Pathway</h2><p>Pathway view loading...</p></div></div>
 
                 </div>
             </div>
@@ -136,7 +146,7 @@
     </div>
 
     <script>
-        // 1. CONFIG
+        // 1. CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyBI4cPSUW12cdf1d548GjcuinYxdeL8Phk",
             authDomain: "yoursurgicalcareer.firebaseapp.com",
@@ -152,7 +162,7 @@
         let isDemo = false;
         let isSignUp = false;
         
-        // DATASETS
+        // 3. DATASETS
         const jobListings = [
             { title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025", salary: "£55,329" },
             { title: "ST3 General Surgery", location: "West Midlands", grade: "ST3", specialty: "General Surgery", comp: "6.5", deadline: "29 Nov 2025", salary: "£55,329" },
@@ -160,13 +170,15 @@
         ];
 
         const hospitalData = [
-            { name: "Aberdeen Royal Infirmary", city: "Aberdeen", website: "#", specialties: ["Trauma", "General"] },
-            { name: "Ninewells Hospital", city: "Dundee", website: "#", specialties: ["Vascular", "General"] },
-            { name: "Glasgow Royal Infirmary", city: "Glasgow", website: "#", specialties: ["Plastics", "General"] }
+            { name: "Aberdeen Royal Infirmary", city: "Aberdeen", reviews: { rent: "£600", transport: "Car", lifestyle: "Outdoors", verdict: "Great" } },
+            { name: "Ninewells Hospital", city: "Dundee", reviews: { rent: "£550", transport: "Bus", lifestyle: "Student", verdict: "Friendly" } },
+            { name: "Glasgow Royal Infirmary", city: "Glasgow", reviews: { rent: "£850", transport: "Subway", lifestyle: "City", verdict: "Busy" } }
         ];
 
-        // 3. MAIN LOGIC
+        // 4. MAIN LOGIC
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("App Started");
+            
             // Init Firebase
             try {
                 if (typeof firebase === 'undefined') throw new Error("Firebase not loaded");
@@ -174,7 +186,7 @@
                 auth = firebase.auth();
                 db = firebase.firestore();
                 storage = firebase.storage();
-                console.log("Firebase Initialized");
+                console.log("Firebase Connected");
 
                 auth.onAuthStateChanged((u) => {
                     if (u) { user = u; showApp(); loadData(); }
@@ -183,31 +195,19 @@
             } catch (e) {
                 console.error(e);
                 isDemo = true;
-                console.log("Running in Demo Mode (No Backend)");
             }
 
             // Auth Buttons
             document.getElementById('btn-toggle-mode').addEventListener('click', () => {
                 isSignUp = !isSignUp;
-                const title = document.getElementById('auth-title');
-                const btn = document.getElementById('btn-auth-action');
-                const toggleBtn = document.getElementById('btn-toggle-mode');
-                
-                if (isSignUp) {
-                    title.textContent = "Create Account";
-                    btn.textContent = "Sign Up";
-                    toggleBtn.textContent = "Sign In";
-                } else {
-                    title.textContent = "Welcome Back";
-                    btn.textContent = "Sign In";
-                    toggleBtn.textContent = "Create an account";
-                }
+                document.getElementById('auth-title').textContent = isSignUp ? "Create Account" : "Welcome Back";
+                document.getElementById('btn-auth-action').textContent = isSignUp ? "Sign Up" : "Sign In";
             });
 
             document.getElementById('btn-auth-action').addEventListener('click', () => {
                 const e = document.getElementById('login-email').value;
                 const p = document.getElementById('login-password').value;
-                if (isDemo) { alert("Demo mode: Logging in as Guest."); isDemo = true; user = {uid:'demo', email:'guest@demo.com'}; showApp(); return; }
+                if (isDemo) { alert("Demo mode"); isDemo = true; user = {uid:'demo', email:'guest@demo.com'}; showApp(); return; }
                 
                 if (isSignUp) {
                     auth.createUserWithEmailAndPassword(e, p).catch(err => alert(err.message));
@@ -241,9 +241,10 @@
                 }
             });
 
-            // Renderers
+            // Initial Renders
             renderJobs();
             renderHospitals();
+            renderReviews();
             initCharts();
         });
 
@@ -273,21 +274,18 @@
             });
             if(document.getElementById('stat-points')) document.getElementById('stat-points').textContent = pts;
             if(document.getElementById('stat-count')) document.getElementById('stat-count').textContent = list.length;
-            if(document.getElementById('gauge-text')) document.getElementById('gauge-text').textContent = Math.round(pts/40*100)+"%";
-            if(window.gaugeChart) { window.gaugeChart.data.datasets[0].data = [pts, Math.max(0, 40-pts)]; window.gaugeChart.update(); }
+            updateCharts(pts);
         }
 
         function renderJobs(filters = {}) {
             const container = document.getElementById('job-list-container');
             if(!container) return;
             container.innerHTML = '';
-            const filtered = jobListings.filter(job => {
-                return (!filters.region || job.location.includes(filters.region));
-            });
+            const filtered = jobListings.filter(job => (!filters.region || job.location.includes(filters.region)));
             filtered.forEach(job => {
                 const card = document.createElement('div');
-                card.className = 'bg-white border rounded-lg p-5 hover:shadow-md transition-shadow';
-                card.innerHTML = `<div class="flex justify-between items-start mb-3"><div><h3 class="font-bold text-lg text-blue-700">${job.title}</h3><p class="text-sm text-gray-600">${job.location}</p></div><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">${job.grade}</span></div><div class="grid grid-cols-3 gap-2 mb-4 text-sm"><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Comp</span><span class="font-semibold">${job.comp}</span></div><div class="bg-gray-50 p-2 rounded border"><span class="block text-xs text-gray-500">Deadline</span><span class="font-semibold text-red-600">${job.deadline}</span></div></div><button class="w-full bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button>`;
+                card.className = 'bg-white border rounded-lg p-5 hover:shadow-md';
+                card.innerHTML = `<div class="flex justify-between mb-3"><h3 class="font-bold text-blue-700">${job.title}</h3><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">${job.grade}</span></div><p class="text-sm text-gray-600 mb-2">${job.location}</p><button class="w-full bg-[var(--surgeon-blue)] text-white text-sm py-2 rounded">View</button>`;
                 container.appendChild(card);
             });
         }
@@ -298,10 +296,15 @@
             container.innerHTML = '';
             const filtered = hospitalData.filter(h => h.name.toLowerCase().includes(searchTerm.toLowerCase()));
             filtered.forEach(h => {
-                const div = document.createElement('div');
-                div.className = 'border p-4 rounded bg-white hover:shadow';
-                div.innerHTML = `<h4 class="font-bold text-[var(--surgeon-blue)]">${h.name}</h4><p class="text-xs text-gray-500">${h.city}</p>`;
-                container.appendChild(div);
+                container.innerHTML += `<div class="border p-4 rounded bg-white hover:shadow"><h4 class="font-bold text-[var(--surgeon-blue)]">${h.name}</h4><p class="text-xs text-gray-500">${h.city}</p></div>`;
+            });
+        }
+
+        function renderReviews() {
+            const container = document.getElementById('review-list');
+            if(!container) return;
+            hospitalData.forEach(h => {
+                container.innerHTML += `<div class="border rounded bg-white p-4 shadow-sm"><h3 class="font-bold text-blue-700">${h.name}</h3><p class="text-sm">Rent: ${h.reviews.rent} | Vibe: ${h.reviews.lifestyle}</p><p class="text-sm italic text-blue-900">"${h.reviews.verdict}"</p></div>`;
             });
         }
 
@@ -309,6 +312,7 @@
         window.switchJobTab = (t) => {
             document.getElementById('job-training').classList.toggle('hidden', t !== 'training');
             document.getElementById('job-hospital').classList.toggle('hidden', t !== 'hospital');
+            document.getElementById('job-reviews').classList.toggle('hidden', t !== 'reviews');
         };
 
         document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', (e) => {
@@ -319,32 +323,23 @@
             l.classList.add('active');
         }));
 
-        document.getElementById('filter-region')?.addEventListener('change', (e) => renderJobs({region: e.target.value}));
-        document.getElementById('hosp-search')?.addEventListener('input', (e) => renderHospitals(e.target.value));
-
         function initCharts() {
             lucide.createIcons();
             const ctx = document.getElementById('progressGauge')?.getContext('2d');
             if(ctx) {
                 window.gaugeChart = new Chart(ctx, {
                     type: 'doughnut',
-                    data: {
-                        datasets: [{ data: [0, 40], backgroundColor: ['#004AAD', '#e5e7eb'], borderWidth: 0, cutout: '80%', circumference: 270, rotation: 225 }]
-                    },
+                    data: { datasets: [{ data: [0, 40], backgroundColor: ['#004AAD', '#e5e7eb'], borderWidth: 0, cutout: '80%', circumference: 270, rotation: 225 }] },
                     options: { plugins: { tooltip: { enabled: false } } }
                 });
             }
             const rCtx = document.getElementById('readinessChart')?.getContext('2d');
-            if(rCtx) {
-                new Chart(rCtx, {
-                    type: 'radar',
-                    data: {
-                        labels: ['Research', 'Lead', 'Clin', 'Teach', 'Audit'],
-                        datasets: [{ data: [6, 8, 9, 7, 5], backgroundColor: 'rgba(0, 191, 166, 0.2)', borderColor: '#00BFA6' }]
-                    },
-                    options: { plugins: { legend: { display: false } }, scales: { r: { ticks: { display: false } } } }
-                });
-            }
+            if(rCtx) new Chart(rCtx, { type: 'radar', data: { labels: ['Research', 'Lead', 'Clin', 'Teach', 'Audit'], datasets: [{ data: [6, 8, 9, 7, 5], backgroundColor: 'rgba(0, 191, 166, 0.2)', borderColor: '#00BFA6' }] }, options: { plugins: { legend: { display: false } } } });
+        }
+
+        function updateCharts(pts) {
+            if(document.getElementById('gauge-text')) document.getElementById('gauge-text').textContent = Math.round(pts/40*100)+"%";
+            if(window.gaugeChart) { window.gaugeChart.data.datasets[0].data = [pts, Math.max(0, 40-pts)]; window.gaugeChart.update(); }
         }
     </script>
 </body>
