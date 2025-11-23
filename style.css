@@ -1,0 +1,10 @@
+:root { --surgeon-blue: #004AAD; --ascension-green: #00BFA6; --light-bg: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b; }
+body { font-family: 'Inter', sans-serif; background-color: var(--light-bg); color: var(--text-primary); }
+.font-serif { font-family: 'Playfair Display', serif; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.nav-link.active { background-color: var(--surgeon-blue); color: white; }
+.nav-link.active svg { color: white; }
+.tab-btn.active { color: var(--surgeon-blue); border-bottom: 2px solid var(--surgeon-blue); font-weight: 600; }
+.tab-btn { padding-bottom: 8px; border-bottom: 2px solid transparent; }
+.review-score { background: #00aa6c; color: white; font-weight: bold; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
