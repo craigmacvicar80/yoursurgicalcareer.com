@@ -15,11 +15,8 @@
         :root { --surgeon-blue: #002D72; --ascension-green: #009E73; }
         .tab-content { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Heart Animation */
-        .heart-btn { transition: all 0.2s ease; }
-        .heart-btn:active { transform: scale(0.8); }
-        .heart-filled { color: #ef4444; fill: #ef4444; } /* Red and Filled */
+        .heart-btn { transition: transform 0.2s; cursor: pointer; }
+        .heart-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden">
@@ -32,12 +29,11 @@
                     <i data-lucide="activity" class="w-8 h-8"></i>
                 </div>
                 <h1 class="text-3xl font-bold text-[var(--surgeon-blue)] tracking-tight">YSC</h1>
-                <p class="text-gray-500 text-sm mt-1">Redefining Surgical Training</p>
             </div>
             <div class="space-y-4">
-                <input type="email" id="login-email" placeholder="doctor@nhs.net" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                <input type="password" id="login-password" placeholder="Password" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                <button id="btn-auth-action" class="w-full bg-[var(--surgeon-blue)] text-white font-bold py-3.5 rounded-lg hover:shadow-lg transition-all mt-2">Sign In</button>
+                <input type="email" id="login-email" placeholder="Email" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <input type="password" id="login-password" placeholder="Password" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <button id="btn-auth-action" class="w-full bg-[var(--surgeon-blue)] text-white font-bold py-3.5 rounded-lg hover:shadow-lg mt-2">Sign In</button>
                 <div class="text-center pt-4"><button id="btn-skip" class="text-sm text-gray-500 hover:text-blue-600">Continue as Guest</button></div>
             </div>
         </div>
@@ -46,7 +42,6 @@
     <div id="app-container" class="hidden flex h-screen">
         <aside class="w-64 bg-[#002D72] text-white flex-col hidden md:flex shadow-xl z-20">
             <div class="p-6 border-b border-blue-800/50 flex items-center gap-3">
-                <div class="w-8 h-8 bg-white/10 rounded flex items-center justify-center"><i data-lucide="activity" class="w-5 h-5"></i></div>
                 <span class="font-bold text-lg">YSC</span>
             </div>
             <nav class="flex-1 p-4 space-y-2">
@@ -61,212 +56,4 @@
         </aside>
 
         <main class="flex-1 overflow-y-auto bg-slate-50 w-full">
-            <header class="bg-white border-b sticky top-0 z-10 md:hidden p-4 flex justify-between items-center shadow-sm">
-                <span class="font-bold text-[var(--surgeon-blue)]">YSC</span>
-                <button class="p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
-            </header>
-
-            <div id="dashboard" class="tab-content p-6 md:p-10 max-w-7xl mx-auto">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-gray-500 text-sm uppercase font-bold">Portfolio Score</p>
-                        <div class="flex items-end gap-2 mt-2">
-                            <span class="text-4xl font-bold text-[var(--surgeon-blue)]">24</span><span class="text-gray-400">/ 40</span>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-gray-500 text-sm uppercase font-bold">Next Deadline</p>
-                        <div class="flex items-end gap-2 mt-2">
-                            <span class="text-4xl font-bold text-red-600">14</span><span class="text-gray-400">days</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center gap-2 mb-4 pb-4 border-b">
-                        <i data-lucide="heart" class="w-5 h-5 text-red-500 fill-current"></i>
-                        <h3 class="font-bold text-lg text-gray-800">Saved Opportunities</h3>
-                    </div>
-                    <div id="dashboard-saved-list" class="space-y-3">
-                        <p class="text-gray-400 text-sm italic">Loading...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="jobs" class="tab-content hidden p-6 md:p-10 max-w-7xl mx-auto">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Job Map</h2>
-                <div id="job-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
-
-            <div id="portfolio" class="tab-content hidden p-6 md:p-10">
-                <div class="text-center text-gray-400 mt-20"><p>Portfolio module loading...</p></div>
-            </div>
-        </main>
-    </div>
-
-    <script>lucide.createIcons();</script>
-
-    <script>
-        // CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyBI4cPSUW12cdf1d548GjcuinYxdeL8Phk",
-            authDomain: "yoursurgicalcareer.firebaseapp.com",
-            projectId: "yoursurgicalcareer",
-            storageBucket: "yoursurgicalcareer.firebasestorage.app",
-            messagingSenderId: "194592071114",
-            appId: "1:194592071114:web:b0248ae5f8aa0207e10333",
-            measurementId: "G-64NTQ6C53V"
-        };
-
-        // INIT
-        if (typeof firebase === 'undefined') { alert("Firebase failed to load."); } 
-        else { firebase.initializeApp(firebaseConfig); }
-
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        let currentUser = null;
-        let savedJobIds = new Set(); // Local tracking of red hearts
-
-        // JOB DATA
-        const jobListings = [
-            { id: "j1", title: "ST3 General Surgery", location: "London (NW)", grade: "ST3", specialty: "General Surgery", comp: "8.2", deadline: "29 Nov 2025" },
-            { id: "j2", title: "ST3 General Surgery", location: "West Midlands", grade: "ST3", specialty: "General Surgery", comp: "6.5", deadline: "29 Nov 2025" },
-            { id: "j3", title: "ST3 T&O", location: "Scotland", grade: "ST3", specialty: "T&O", comp: "12.5", deadline: "29 Nov 2025" },
-            { id: "j4", title: "CT1 Core Training", location: "Yorkshire", grade: "CT1", specialty: "General Surgery", comp: "4.1", deadline: "05 Dec 2025" },
-            { id: "j5", title: "ST3 Urology", location: "West Midlands", grade: "ST3", specialty: "Urology", comp: "6.8", deadline: "29 Nov 2025" },
-            { id: "j6", title: "Clinical Fellow (Plastics)", location: "London (North Central)", grade: "Fellow", specialty: "Plastics", comp: "N/A", deadline: "15 Jan 2026" },
-        ];
-
-        // MAIN LOGIC
-        document.addEventListener("DOMContentLoaded", () => {
-            
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    currentUser = user;
-                    toggleScreens(true);
-                    document.getElementById("user-name-display").innerText = user.email;
-                    renderJobs(); 
-                    startDataListeners(user); // LISTEN FOR DATABASE CHANGES
-                } else {
-                    currentUser = null;
-                    savedJobIds.clear();
-                    toggleScreens(false);
-                }
-            });
-
-            // BUTTONS
-            document.getElementById("btn-auth-action").onclick = () => {
-                const e = document.getElementById("login-email").value;
-                const p = document.getElementById("login-password").value;
-                auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
-            };
-            document.getElementById("btn-skip").onclick = () => {
-                toggleScreens(true);
-                document.getElementById("user-name-display").innerText = "Guest";
-                renderJobs();
-            };
-            document.getElementById("logout-btn").onclick = () => {
-                auth.signOut().then(() => window.location.reload());
-            };
-        });
-
-        // --- 1. LISTENERS: KEEP HEARTS IN SYNC ---
-        function startDataListeners(user) {
-            const listContainer = document.getElementById("dashboard-saved-list");
-            
-            // Listener: Whenever Saved Jobs change (Add or Remove)
-            db.collection("users").doc(user.uid).collection("savedJobs")
-                .onSnapshot((snapshot) => {
-                    // 1. Update Local Tracking
-                    savedJobIds.clear();
-                    const savedDocs = [];
-                    
-                    snapshot.forEach((doc) => {
-                        savedJobIds.add(doc.id);
-                        savedDocs.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    // 2. Update Dashboard List
-                    if (savedDocs.length === 0) {
-                        listContainer.innerHTML = '<p class="text-gray-400 text-sm italic">No jobs saved yet.</p>';
-                    } else {
-                        listContainer.innerHTML = "";
-                        savedDocs.forEach(job => {
-                            const item = document.createElement("div");
-                            item.className = "flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors";
-                            item.innerHTML = `
-                                <div><h4 class="font-bold text-[var(--surgeon-blue)] text-sm">${job.title}</h4><p class="text-xs text-gray-500">${job.location}</p></div>
-                                <button onclick="toggleJob('${job.id}')" class="text-gray-400 hover:text-red-600 text-xs font-medium px-2">Remove</button>
-                            `;
-                            listContainer.appendChild(item);
-                        });
-                    }
-
-                    // 3. Update Hearts on Jobs Tab (Visual Refresh)
-                    updateHeartVisuals();
-                });
-        }
-
-        // --- 2. RENDER JOBS ---
-        function renderJobs() {
-            const container = document.getElementById("job-list-container");
-            container.innerHTML = "";
-            jobListings.forEach(job => {
-                const card = document.createElement("div");
-                card.className = "bg-white p-5 rounded-xl shadow-sm border border-gray-100";
-                
-                // Note: The heart icon gets a unique ID so we can color it later
-                card.innerHTML = `
-                    <div class="flex justify-between mb-2">
-                        <h3 class="font-bold text-[var(--surgeon-blue)]">${job.title}</h3>
-                        <button onclick="toggleJob('${job.id}')" class="heart-btn text-gray-300 hover:text-red-400 transition-colors">
-                            <svg id="heart-${job.id}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5 4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                        </button>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-4">${job.location}</p>
-                    <div class="flex justify-between text-xs font-bold text-gray-400 uppercase">
-                        <span>Comp: ${job.comp || 'N/A'}</span>
-                        <span class="text-red-500">Due: ${job.deadline}</span>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            updateHeartVisuals(); // Check hearts immediately after render
-        }
-
-        // --- 3. VISUAL UPDATE (RED VS GRAY) ---
-        function updateHeartVisuals() {
-            jobListings.forEach(job => {
-                const heartIcon = document.getElementById(`heart-${job.id}`);
-                if (heartIcon) {
-                    if (savedJobIds.has(job.id)) {
-                        // IS SAVED: Make Red & Filled
-                        heartIcon.classList.add('text-red-500', 'fill-current');
-                        heartIcon.classList.remove('text-gray-300');
-                    } else {
-                        // NOT SAVED: Make Gray & Outline
-                        heartIcon.classList.remove('text-red-500', 'fill-current');
-                        heartIcon.classList.add('text-gray-300');
-                    }
-                }
-            });
-        }
-
-        // --- 4. TOGGLE LOGIC (SAVE / UNSAVE) ---
-        window.toggleJob = (jobId) => {
-            if (!currentUser) { alert("Login required"); return; }
-
-            const ref = db.collection("users").doc(currentUser.uid).collection("savedJobs").doc(jobId);
-
-            if (savedJobIds.has(jobId)) {
-                // IF SAVED -> DELETE IT
-                ref.delete().catch(e => alert(e.message));
-            } else {
-                // IF NOT SAVED -> ADD IT
-                const job = jobListings.find(j => j.id === jobId);
-                ref.set(job).catch(e => alert(e.message));
-            }
-            // Note: 
-            }
+            <header class="bg-white border-b sticky top-
